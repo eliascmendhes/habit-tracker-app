@@ -49,7 +49,7 @@ export function NewHabitForm() {
       </label>
 
       <input type="text"
-      className="p-4 rounded-lg wt-3 bg-zinc-800 text-white placeholder:text-zinc-400"
+      className="p-4 mt-3 rounded-lg wt-3 bg-zinc-800 text-white placeholder:text-zinc-400"
       id="title"
       placeholder="Exercícios"
       autoFocus
