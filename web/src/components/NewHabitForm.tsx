@@ -1,7 +1,10 @@
-import * as Checkbox from "@radix-ui/react-checkbox";
-import { Check } from "phosphor-react";
-import { FormEvent, useState } from "react";
-import { api } from "../lib/axios";
+// Importação dos módulos necessários
+import * as Checkbox from "@radix-ui/react-checkbox"; // Importação do componente Checkbox do radix-ui/react-checkbox
+import { Check } from "phosphor-react"; // Importação do ícone de check da biblioteca phosphor-react
+import { FormEvent, useState } from "react"; // Importação dos hooks FormEvent e useState do React
+import { api } from "../lib/axios"; // Importação do módulo api de uma pasta lib/axios
+
+// Definição de um array de strings com os dias da semana
 const availableWeekDays = [
   'Domingo',
   'Segunda-feira',
@@ -11,30 +14,37 @@ const availableWeekDays = [
   'Sexta-feira',
   'Sábado'
 ];
+
+// Definição do componente NewHabitForm
 export function NewHabitForm() {
+  // Definição dos estados de título e dias da semana selecionados
   const [title, setTitle] = useState('')
   const [weekDays, setWeekDays] = useState<number[]>([])
 
+  // Função assíncrona que cria um novo hábito ao ser submetido o formulário
   async function createNewHabit(event: FormEvent) {
     event.preventDefault()
+    // Verificação se o título não está vazio e se ao menos um dia da semana foi selecionado
     if(!title || weekDays.length === 0) {
       return
     } else {
+      // Chamada à API para criar um novo hábito
       api.post('habits', {
         title,
         weekDays
       })
 
+      // Limpeza dos estados de título e dias da semana
       setTitle('')
       setWeekDays([])
     }
 
   }
 
+  // Função que alterna a seleção de um dia da semana
   function handleToggleWeekDay(weekDay:number) {
     if(weekDays.includes(weekDay)) {
       const weekDaysWithRemoveOne = weekDays.filter(day => day != weekDay) 
-
       setWeekDays(weekDaysWithRemoveOne)
     } else {
       const weekDaysWithAddOne = [...weekDays, weekDay] 
@@ -42,35 +52,38 @@ export function NewHabitForm() {
 
     }
   }
+
+  // Retorno do formulário para criação de um novo hábito
   return (
     <form onSubmit={createNewHabit} className="w-full flex flex-col mt-6">
+      {/* Label e input para inserção do título do hábito */}
       <label className="font-semibold loading-tight" htmlFor="title">
         Qual seu comprometimento?
       </label>
-
       <input type="text"
-      className="p-4 mt-3 rounded-lg wt-3 bg-zinc-800 text-white placeholder:text-zinc-400"
-      id="title"
-      placeholder="Exercícios"
-      autoFocus
-      value={title}
-      onChange={event => setTitle(event.target.value)}
+        className="p-4 mt-3 rounded-lg wt-3 bg-zinc-800 text-white placeholder:text-zinc-400"
+        id="title"
+        placeholder="Exercícios"
+        autoFocus
+        value={title}
+        onChange={event => setTitle(event.target.value)}
       />
 
+      {/* Label e checkboxes para seleção dos dias da semana */}
       <label htmlFor="" className="font-semibold loading-tight mt-4">
         Qual a recorrência?
       </label>
-
       <div className="flex flex-col gap-2 mt-3">
+        {/* Mapeamento do array availableWeekDays para renderização de checkboxes */}
         {availableWeekDays.map((weekDay, index) => {
           return (
             <Checkbox.Root
-            key={weekDay}
-            checked={weekDays.includes(index)}
-            className='flex items-center gap-3 group'
-            onCheckedChange={() => {handleToggleWeekDay(index)}}
-          >
-            <div className='h-8 w-8 rounded-lg flex items-center justify-center bg-zinc-900 border-2 border-zinc-800 group-data-[state=checked]:bg-green-500 group-data-[state=checked]:border-green-500 transition-colors'>
+              key={weekDay}
+              checked={weekDays.includes(index)}
+              className='flex items-center gap-3 group'
+              onCheckedChange={() => {handleToggleWeekDay(index)}}
+            >
+              <div className='h-8 w-8 rounded-lg flex items-center justify-center bg-zinc-900 border-2 border-zinc-800 group-data-[state=checked]:bg-green-500 group-data-[state=checked]:border-green-500 transition-colors'>
             <Checkbox.Indicator>
               <Check size={20} className="text-white"/>
             </Checkbox.Indicator>

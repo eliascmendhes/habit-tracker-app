@@ -1,15 +1,18 @@
+import { useEffect, useState } from "react";
 import { useRoute } from "@react-navigation/native";
 import { Alert, ScrollView, Text, View } from "react-native";
 import dayjs from "dayjs";
 import clsx from "clsx";
-import {HabitsEmpty} from '../components/HabitsEmpty'
-import { BackButton } from "../components/BackButton";
-import { ProgressBar } from "../components/Progress.Bar";
-import { Checkbox } from "../components/Checkbox";
-import { useEffect, useState } from "react";
-import { Loading } from "../components/Loading";
+
 import { api } from "../lib/axios";
-import {generateProgressPercentage} from '../utils/generate-progress-percentage'
+import { generateProgressPercentage } from '../utils/generate-progress-percentage'
+
+import { BackButton } from "../components/BackButton";
+import { Checkbox } from "../components/Checkbox";
+import { HabitsEmpty } from '../components/HabitsEmpty'
+import { Loading } from "../components/Loading";
+import { ProgressBar } from "../components/Progress.Bar";
+
 interface Params {
   date: string;
 }
@@ -23,115 +26,110 @@ interface DayInfoProps {
 }
 
 export function Habit() {
-  const [loading, setLoading] = useState(true)
-  const [dayInfo, setDayInfo] = useState<DayInfoProps | null>(null)
-  const [completedHabits, setCompletedHabits] = useState<string[]>([])
+const [loading, setLoading] = useState(true)
+const [dayInfo, setDayInfo] = useState<DayInfoProps | null>(null)
+const [completedHabits, setCompletedHabits] = useState<string[]>([])
 
-  const route = useRoute()
-  const { date } = route.params as Params;
+const route = useRoute()
+const { date } = route.params as Params; // Extrai o parâmetro 'date' da rota
 
-  const habitsProgress = dayInfo?.possibleHabits.length 
-  ? generateProgressPercentage(dayInfo.possibleHabits.length, completedHabits.length)
-   : 0
+const habitsProgress = dayInfo?.possibleHabits.length 
+? generateProgressPercentage(dayInfo.possibleHabits.length, completedHabits.length)
+: 0 // Define a porcentagem de progresso com base nas informações do dia e hábitos concluídos
 
+const parsedDate = dayjs(date); // Analisa a data fornecida
+const isDateInPast = parsedDate.endOf('day').isBefore(new Date()) // Verifica se a data fornecida é anterior ao dia atual
+const dayOfWeek = parsedDate.format('dddd'); // Formata a data para exibir o dia da semana
+const dayAndMonth = parsedDate.format('DD/MM'); // Formata a data para exibir dia e mês
 
-  const parsedDate = dayjs(date);
-  const isDateInPast = parsedDate.endOf('day').isBefore(new Date())
-  const dayOfWeek = parsedDate.format('dddd');
-  const dayAndMonth = parsedDate.format('DD/MM');
+async function fetchHabits() { // Função para buscar hábitos do dia
+  try {
+    setLoading(true) // Configura o status de carregamento para verdadeiro
+    const response = await api.get('/day', {params: {date}}) // Faz uma solicitação GET para obter os hábitos do dia
 
-  async function fetchHabits() {
-    try {
-      setLoading(true)
-      const response = await api.get('/day', {params: {date}})
+    setDayInfo(response.data) // Define as informações do dia com base na resposta da API
+    setCompletedHabits(response.data.completedHabits) // Define os hábitos concluídos com base na resposta da API
 
-      setDayInfo(response.data)
-      setCompletedHabits(response.data.completedHabits)
-
-    } catch (error){
-      console.log(error)
-      Alert.alert('ops', 'Não foi dessa vez.')
-    }
-
-    finally {
-      setLoading(false)
-
-    }
+  } catch (error){
+    console.log(error) // Registra qualquer erro no console
+    Alert.alert('ops', 'Não foi dessa vez.') // Exibe um alerta ao usuário
   }
 
-  async function handleToggleHabit(habitId: string) {
-    try {
-      await api.patch(`/habits/${habitId}/toggle`)
-     
-    if(completedHabits.includes(habitId)) {
-      setCompletedHabits(prevState => prevState.filter(habit => habit !== habitId))
+  finally {
+    setLoading(false) // Configura o status de carregamento para falso, independentemente do resultado da solicitação
+  }
+}
+
+async function handleToggleHabit(habitId: string) { // Função para alternar o status do hábito
+  try {
+    await api.patch(`/habits/${habitId}/toggle`) // Faz uma solicitação PATCH para alternar o status do hábito
+
+    if(completedHabits.includes(habitId)) { // Verifica se o hábito está na lista de hábitos concluídos
+      setCompletedHabits(prevState => prevState.filter(habit => habit !== habitId)) // Remove o hábito da lista de hábitos concluídos
     } else {
-      setCompletedHabits(prevState => [...prevState, habitId])
+      setCompletedHabits(prevState => [...prevState, habitId]) // Adiciona o hábito à lista de hábitos concluídos
     }
   } catch(error) {
-    console.log(error)
-    Alert.alert('ops', 'não foi possível atualizar o status do hábito')
-  }
-    
-  }
+    console.log(error) // Registra qualquer erro no console
+    Alert.alert('ops', 'não foi possível atualizar o status do hábito') // Exibe um alerta ao usuário
+  }    
+}
 
-  useEffect(() => {
-    fetchHabits()
-  }, [])
-  if(loading) {
-    return (
-      <Loading />
-    )
-  }
+useEffect(() => { // Hook de efeito para buscar hábitos do dia ao montar o componente
+  fetchHabits()
+}, [])
 
+if(loading) { // Se ainda estiver carregando, exibe uma tela de carregamento
   return (
-    <View className="flex-1 bg-background px-8 pt-16">
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 100 }}
-      >
-        <BackButton />
+    <Loading />
+  )
+}
 
-        <Text className="mt-6 text-zinc-400 font-semibold text-base lowercase">
-          {dayOfWeek}
-        </Text>
+return (
+  <View className="flex-1 bg-background px-8 pt-16">
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: 100 }}
+    >
+<BackButton />
 
-        <Text className="text-white font-extrabold text-3xl">
-          {dayAndMonth}
-        </Text>
+<Text className="mt-6 text-zinc-400 font-semibold text-base lowercase">
+  {dayOfWeek}
+</Text>
 
-        <ProgressBar progress={habitsProgress} />
+<Text className="text-white font-extrabold text-3xl">
+  {dayAndMonth}
+</Text>
 
-        <View className={clsx("mt-6", {
-          ["opacity-50"] : isDateInPast
-        })}>
-         {
-          dayInfo?.possibleHabits ?
-          dayInfo?.possibleHabits.map(habit => (
-            <Checkbox 
-            key={habit.id} 
-            title={habit.title} 
-            checked={completedHabits.includes(habit.id)}
-            disabled={isDateInPast}
-            onPress={() => handleToggleHabit(habit.id)}
-            />
-          ))
+{/*  /> // Exibe uma barra de progresso com base nos hábitos concluídos */}
+<ProgressBar progress={habitsProgress} />
+<View className={clsx("mt-6", {
+  ["opacity-50"] : isDateInPast
+})}>
+ {
+  dayInfo?.possibleHabits ? // Se há hábitos disponíveis para o dia
+  dayInfo?.possibleHabits.map(habit => (
+    <Checkbox 
+    key={habit.id} 
+    title={habit.title} 
+    checked={completedHabits.includes(habit.id)} // Verifica se o hábito foi concluído
+    disabled={isDateInPast} // Desativa a caixa de seleção se a data for anterior ao dia atual
+    onPress={() => handleToggleHabit(habit.id)} // Chama a função para alternar o status do hábito ao pressionar a caixa de seleção
+    />
+  ))
 
-          : <HabitsEmpty />
-         }
+  : <HabitsEmpty /> // Se não houver hábitos disponíveis, exibe uma mensagem indicando que não há hábitos para o dia
+ }
+</View>
 
-    
+{
+  isDateInPast && ( // Se a data for anterior ao dia atual, exibe uma mensagem indicando que os hábitos não podem ser editados
+    <Text className="text-white mt-10 text-center">
+      Você não pode editar um hábito de uma data passada.
+    </Text>
+  )
+}
 
-          
-        </View>
-
-        {
-          isDateInPast && (
-            <Text className="text-white mt-10 text-center">
-              Você não pode editar um hábito de uma data passada.
-            </Text>
-          )
-        }
       </ScrollView>
     </View>
   )

@@ -22,6 +22,7 @@ interface HabitsInfo {
 export function HabitsList({ date, onCompletedChanged }: HabitListProps) {
   const [habitsInfo, setHabitsInfo] = useState<HabitsInfo>();
 
+  // Busca informações dos hábitos do dia na API ao montar o componente
   useEffect(() => {
     api.get('day', {
       params: {
@@ -32,8 +33,10 @@ export function HabitsList({ date, onCompletedChanged }: HabitListProps) {
     });
   }, []);
 
+  // Checa se a data é passada para desabilitar os checkboxes
   const isDateInPast = dayjs(date).endOf('day').isBefore(new Date());
 
+  // Altera o estado de conclusão de um hábito e atualiza a API
   async function handleToggleHabit(habitId: string) {
     const isHabitAlreadyCompleted = habitsInfo!.completedHabits.includes(habitId);
 
@@ -47,6 +50,7 @@ export function HabitsList({ date, onCompletedChanged }: HabitListProps) {
       completedHabits = [...habitsInfo!.completedHabits, habitId];
     }
 
+    // Atualiza o estado local dos hábitos e chama o callback para atualizar o contador
     setHabitsInfo({
       possibleHabits: habitsInfo!.possibleHabits,
       completedHabits,

@@ -1,15 +1,15 @@
-import { View, TouchableOpacity, Text } from "react-native";
-import { Feather } from '@expo/vector-icons';
-import colors from 'tailwindcss/colors';
-import { useNavigation } from "@react-navigation/native";
+import { View, TouchableOpacity, Text } from "react-native"; // Importação dos componentes do React Native
+import { Feather } from '@expo/vector-icons'; // Importação do ícone do Feather
+import colors from 'tailwindcss/colors'; // Importação das cores do Tailwind CSS
+import { useNavigation } from "@react-navigation/native"; // Importação do hook useNavigation do React Navigation
 
-import Logo from '../assets/logo.svg';
+import Logo from '../assets/logo.svg'; // Importação do componente de logo SVG
 
 export function Header() {
-  const { navigate } = useNavigation()
+  const { navigate } = useNavigation() // Recebe a função navigate do hook useNavigation para navegar para a página de criação de um novo hábito
 
+  // View que contém o header com o logo e o botão de adicionar hábito
   return (
-    // View que contém o header com o logo e o botão de adicionar hábito
     <View className="w-full flex-row items-center justify-between">
       {/* Logo da aplicação */}
       <Logo />

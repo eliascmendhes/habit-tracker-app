@@ -1,20 +1,21 @@
-import { TouchableOpacity } from "react-native";
-import { Feather } from '@expo/vector-icons';
-import colors from "tailwindcss/colors";
-import { useNavigation } from "@react-navigation/native";
+import { TouchableOpacity } from "react-native"; // Importação do TouchableOpacity do React Native
+import { Feather } from '@expo/vector-icons'; // Importação do Feather Icons do Expo
+import colors from "tailwindcss/colors"; // Importação de cores personalizadas do Tailwind CSS
+import { useNavigation } from "@react-navigation/native"; // Importação da função useNavigation do react-navigation
 
 export function BackButton() {
-  const { goBack } = useNavigation()
+  const { goBack } = useNavigation() // Recebe a função goBack da função useNavigation
 
+  // Componente TouchableOpacity que chama a função goBack quando clicado
   return (
     <TouchableOpacity 
-      activeOpacity={0.7}
-      onPress={goBack}
+      activeOpacity={0.7} // Opacidade quando o botão é pressionado
+      onPress={goBack} // Função para voltar para a tela anterior
     >
       <Feather 
-        name="arrow-left"
-        size={32}
-        color={colors.zinc[400]}
+        name="arrow-left" // Ícone Feather de seta apontando para a esquerda
+        size={32} // Tamanho do ícone
+        color={colors.zinc[400]} // Cor do ícone
       />
     </TouchableOpacity>
   )

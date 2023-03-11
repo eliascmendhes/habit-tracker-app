@@ -4,51 +4,61 @@ import { z } from "zod"
 import { prisma } from "./lib/prisma"
 
 export async function appRoutes(app: FastifyInstance) {
-  app.post('/habits', async (request) => {
-    const createHabitBody = z.object({
-      title: z.string(),
-      weekDays: z.array(
-        z.number().min(0).max(6)
-      ),
-    })
-
-    const { title, weekDays } = createHabitBody.parse(request.body)
-
-    const today = dayjs().startOf('day').toDate()
-
-    await prisma.habit.create({
-      data: {
-        title,
-        created_at: today,
-        weekDays: {
-          create: weekDays.map((weekDay) => {
-            return {
-              week_day: weekDay,
-            }
-          }),
-        }
-      }
-    })
+  // Define a rota POST para criar hábitos
+app.post('/habits', async (request) => {
+  // Define um objeto com a forma esperada dos dados recebidos no corpo da solicitação
+  const createHabitBody = z.object({
+    title: z.string(), // título do hábito
+    weekDays: z.array( // lista de dias da semana em que o hábito deve ser praticado
+      z.number().min(0).max(6) // número entre 0 (domingo) e 6 (sábado)
+    ),
   })
 
-  app.get('/day', async (request) => {
-    const getDayParams = z.object({
-      date: z.coerce.date(),
-    })
+  // Extrai o título e a lista de dias da semana do corpo da solicitação
+  const { title, weekDays } = createHabitBody.parse(request.body)
 
-    const { date } = getDayParams.parse(request.query)
+  // Obtém a data atual (sem informações de hora) usando a biblioteca dayjs
+  const today = dayjs().startOf('day').toDate()
 
-    const parsedDate = dayjs(date).startOf('day')
-    const weekDay = parsedDate.get('day')
-
-    const possibleHabits = await prisma.habit.findMany({
-      where: {
-        created_at: {
-          lte: date,
-        },
-        weekDays: {
-          some: {
+  // Cria um hábito no banco de dados usando o ORM Prisma
+  await prisma.habit.create({
+    data: {
+      title, // título do hábito
+      created_at: today, // data de criação do hábito
+      weekDays: {
+        create: weekDays.map((weekDay) => {
+          return {
             week_day: weekDay,
+          }
+        }),
+      }
+    }
+  })
+})
+
+// Define a rota GET para obter hábitos com base em um determinado dia da semana
+app.get('/day', async (request) => {
+  // Define um objeto com a forma esperada dos parâmetros de consulta da solicitação
+  const getDayParams = z.object({
+    date: z.coerce.date(), // data no formato de data/hora do JavaScript
+  })
+
+  // Extrai a data da solicitação
+  const { date } = getDayParams.parse(request.query)
+
+  // Cria um objeto dayjs a partir da data e define o dia da semana correspondente
+  const parsedDate = dayjs(date).startOf('day')
+  const weekDay = parsedDate.get('day')
+
+  // Obtém todos os hábitos que foram criados antes da data fornecida e incluem o dia da semana fornecido
+  const possibleHabits = await prisma.habit.findMany({
+    where: {
+      created_at: {
+        lte: date,
+      },
+      weekDays: {
+        some: {
+          week_day: weekDay,
           }
         }
       },
