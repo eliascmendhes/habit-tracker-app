@@ -34,4 +34,4 @@ A versão mobile do aplicativo é construída usando o framework [Expo](https://
 -   react-native-svg
 -   react-native-reanimated
 
-Para executar a aplicação, é necessário ter o ambiente de desenvolvimento do React Native configurado e executar o comando `npm start`. É possível executar a aplicação em emuladores iOS e Android, bem como em um navegador da web.
+Para executar a aplicação, é necessário ter o ambiente de desenvolvimento do React Native configurado e executar o comando `npm start`.
